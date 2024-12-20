@@ -54,15 +54,21 @@ function onError(error) {
 
 function sendMessage(event) {
     console.log("ça marche")
-    const newDate = new Date().getTime();
+
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0];
+    
+    const formattedTime = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); // Heure au format HH:mm
+    
     var messageContent = messageInput.value.trim();
     if(messageContent && stompClient) {
         var chatMessage = {
             sender: username,
             content: messageInput.value,
             type: 'CHAT',
-            date: newDate
-            
+            date: formattedDate,
+            time: formattedTime,
+            receiver : "John Doe"
         };
         console.log(chatMessage);
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify( chatMessage));
@@ -74,7 +80,7 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
-
+    console.log(message);
     var messageElement = document.createElement('li');
 
     if(message.type === 'JOIN') {
@@ -95,8 +101,18 @@ function onMessageReceived(payload) {
 
         var usernameElement = document.createElement('span');
         var usernameText = document.createTextNode(message.sender);
+        var dateElement = document.createElement('span');
+        var dateText = document.createTextNode(message.date);
+        var timeElement = document.createElement('span');
+        var timeText = document.createTextNode(message.time);
         usernameElement.appendChild(usernameText);
         messageElement.appendChild(usernameElement);
+        dateElement.appendChild(dateText);
+        dateElement.classList.add('date');
+        timeElement.appendChild(timeText);
+        timeElement.classList.add('time');
+        messageElement.appendChild(dateElement);
+        messageElement.appendChild(timeElement);
     }
 
     var textElement = document.createElement('p');
